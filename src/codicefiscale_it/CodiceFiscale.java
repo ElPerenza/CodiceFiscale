@@ -1,19 +1,44 @@
-package codicefiscale;
+/*
+ * Copyright (C) 2021 Pietro P.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package codicefiscale_it;
 
 import java.io.File;
+import java.text.Normalizer;
 import java.time.Year; 
 import java.util.Scanner;
 
 /**
- * Gestisce un codice fiscale
+ * Gestisce un'istanza di CodiceFiscale.
+ * Il suo uso principale è salvare i dati di una persona per poi generarne il codice fiscale.
+ * Alcuni degli algoritmi possono essere difficili da capire senza sapere come il codice fiscale viene costruito, leggere la <a href="https://it.wikipedia.org/wiki/Codice_fiscale">pagina Wikipedia</a> per più informazioni.
  * @author Pietro P.
  */
 public class CodiceFiscale {
     
     private final String CONSONANTI = "BCDFGHJKLMNPQRSTVWXYZ";
     private final String VOCALI = "AEIOU";
-    public static final int ANNOSOGLIA = 1848; //125 anni prima dell'introduzione del codice fiscale nel 1973. Prima di questa data non è sicuramente nata alcuna persona che abbia vissuto abbastanza per avere un codice fiscale
-    public static final File ELENCOCOMUNI = new File("Comuni Italiani.csv"); //file che contiene i comuni italiani
+    /**
+     * 125 anni prima dell'introduzione del codice fiscale nel 1973. Prima di questa data non è sicuramente nata alcuna persona che abbia vissuto abbastanza per avere un codice fiscale
+     */
+    public static final int ANNOSOGLIA = 1848;
+    /**
+     * File che contiene i comuni italiani
+     */
+    public static final File ELENCOCOMUNI = new File("Comuni Italiani.csv");
     
     private String nome;
     private String cognome;
@@ -70,6 +95,8 @@ public class CodiceFiscale {
      */
     public void setNome(String nome) throws Exception {
         
+        nome = nome.trim();
+        
         if(nome.length() < 1 || nome.isBlank()) {
             throw new Exception("Il nome non può essere vuoto o composto da soli spazi.");
         }
@@ -82,6 +109,8 @@ public class CodiceFiscale {
      * @throws Exception se il cognome non è stato inserito o se è composto da spazi e basta
      */
     public void setCognome(String cognome) throws Exception {
+        
+        cognome = cognome.trim();
         
         if(cognome.length() < 1 || cognome.isBlank()) {
             throw new Exception("Il cognome non può essere vuoto o composto da soli spazi.");
@@ -250,11 +279,11 @@ public class CodiceFiscale {
         
         stringa = rimouviAccentate(stringa); //sostituisce le lettere accentate con quelle non accentate
         
-        String ridotta = "";    //parto da stringa vuota
+        String ridotta = ""; //parto da stringa vuota
         
         for (int i = 0; i < stringa.length(); i++) {
             if (caratteri.indexOf(stringa.charAt(i)) != -1)
-                //aggiungo la consonante alla stringa tmp
+                //aggiungo la consonante alla stringa ridotta
                 ridotta = ridotta + stringa.charAt(i);
         }
         return ridotta;
@@ -271,10 +300,8 @@ public class CodiceFiscale {
         
         cognome = cognome.toUpperCase(); //assicura che la stringa sia tutta maiuscola (il codice fiscale è tutto in maiuscolo)
         
-        /*
-        Genera una stringa basata sul cognome che ha tutte le consonanti del cognome, poi tutte le vocali del cognome e infine 2 "X"
-        Questo fa si che, prendendo i primi 3 caratteri di questa stringa si abbia in risultato i tre caratteri da usare nel codice fiscale
-        */
+        //Genera una stringa basata sul cognome che ha tutte le consonanti del cognome, poi tutte le vocali del cognome e infine 2 "X"
+        //Questo fa si che, prendendo i primi 3 caratteri di questa stringa si abbia in risultato i tre caratteri da usare nel codice fiscale
         output = stringaRidotta(CONSONANTI, cognome) + stringaRidotta(VOCALI, cognome) + "XX";
         
         return output.substring(0,3); //si recuperano le 3 letter del cognome da usare
@@ -325,7 +352,7 @@ public class CodiceFiscale {
      */
     private char charMeseNascita(int mese) {
         
-        String codicemesi ="ABCDEHLMPRST"; //la codifica del caratteri del mese del codice fiscale (gennaio: a, febbraio: b, ...)
+        String codicemesi ="ABCDEHLMPRST"; //la codifica del caratteri del mese del codice fiscale (gennaio: A, febbraio: B, ...)
         
         return codicemesi.charAt(mese-1); //si restituisce il carattere che corrisponde al mese
     }
@@ -338,7 +365,7 @@ public class CodiceFiscale {
      */
     private String stringaGiornoNascitaSesso(int giorno, char sesso) {
         
-        String output = String.valueOf(giorno); //si inizializza l'output al valore del giorno
+        String output = null;
         
         if(sesso=='f' || sesso=='F') { //se il sesso è femminile, al giorno si aggiunge 40
             giorno=giorno+40;
@@ -398,7 +425,6 @@ public class CodiceFiscale {
         
         //l'array da cui prendere il numero da utilizzare per ogni carattere dispari (quello pari è semplicemente numeri crescenti da 0 a 25)
         int[] charDispari = {1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23};
-        String selCharControllo = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; //la stringa da cui prendere il carattere di controllo
         char charControllo;
         int somma=0; //somma di tutti valori dei caratteri del codice fiscale
         
@@ -424,8 +450,8 @@ public class CodiceFiscale {
             }
         }
         
-        //si prende il resto della divisione per 26 della somma totale e lo si usa per prendere il carattere di controllo che si trova nell'indice definito dal resto nella stringa "selCharControllo"
-        charControllo = selCharControllo.charAt(somma%26);
+        //si prende il resto della divisione per 26 della somma totale e lo si usa per prendere il carattere di controllo sommando il resto ad "A" (il numero risultante è il codice Unicode del char controllo
+        charControllo = (char)((somma % 26)+'A');
         
         return charControllo;
     }
@@ -498,18 +524,14 @@ public class CodiceFiscale {
     }
     
     /**
-     * sostituisce le lettere accentate della stringa con le loror controparti non accentate
+     * sostituisce le lettere accentate della stringa con le loro controparti non accentate
      * @param stringa la stringa da cui rimuovere gli accenti
      * @return la stringa data in input senza lettere accentate
      */
     private String rimouviAccentate(String stringa) {
         
-        stringa = stringa.replace('À', 'A');
-        stringa = stringa.replace('É', 'E');
-        stringa = stringa.replace('È', 'E');
-        stringa = stringa.replace('Ì', 'I');
-        stringa = stringa.replace('Ò', 'O');
-        stringa = stringa.replace('Ù', 'U');
+        stringa = Normalizer.normalize(stringa, Normalizer.Form.NFD); //normalizza stringa
+        stringa = stringa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", ""); //rimuove gli accenti
         
         return stringa;
     }

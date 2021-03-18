@@ -1,9 +1,20 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2021 Pietro P.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package codicefiscale;
+package codicefiscale_en;
 
 import java.time.Year;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -16,7 +27,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 /**
- *
+ * Controls the UI of the app, interfacing with the CodiceFiscale class to generate the fiscal code.
  * @author Pietro P.
  */
 public class CodiceFiscaleUI extends javax.swing.JFrame {
@@ -27,8 +38,8 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     public CodiceFiscaleUI() {
         initComponents();
         try {
-            initTableComune(); //inizializza la l'elenco dei comuni cn i dati dal file .csv dei comuni
-            textFieldComuneUpdate(); //documentListener per aggiornare la ricerca in tableComune
+            initTableComune(); //initialize the jTable with the municipalities using the data from the included .csv file
+            textFieldComuneUpdate(); //documentListener that updates the filter for the search in the jTable with municipalities
         } catch(Exception ex) {
             textFieldErrori.setText(ex.getMessage());
         }
@@ -294,21 +305,21 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     /**
-     * Stampa nel campo "textFieldCodiceFiscale" il codice fiscale generato usando i paramentri inseriti.
-     * Se i dati vengono inseriti male, appare un messaggio di errore in "textFieldErrori"
+     * Prints in "textFieldCodiceFiscale" the Fiscal Code generated from the data inserted in the other fields 
+     * If the data has been inserted incorrectly, the relevant error is printed in "textFieldErrori"
      * @param evt 
      */
     private void buttonGeneraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonGeneraActionPerformed
               
-    //si resettano i campi di errori e codice generato
+    //Fiscal Code and error text fields are reset
     textFieldErrori.setText("");
     textFieldCodiceFiscale.setText("");
 
-    CodiceFiscale codiceFiscale; //creazione nuova variabile codice fiscale
+    CodiceFiscale codiceFiscale;
 
-    char sesso; //carattere che definisce il sesso
+    char sesso; //char that defines the sex of the person
 
-    //si assegna il valore a "sesso"
+    //assigns the correct value to "sesso" (ComboBox SelectedIndex 0 --> male, SelectedIndex 1 --> female)
     if(comboBoxSesso.getSelectedIndex() == 0) {
         sesso = 'm';
     }
@@ -318,36 +329,35 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
 
         try {
             
-            if(tableComune.getSelectedRow() == -1) { //evita che l'errore "inavild index" si presenti in textFieldErrori
+            if(tableComune.getSelectedRow() == -1) { //prevents the "inavild index" error to show up in the errors text field and substitutes it with a more self explaining error
                 throw new Exception("Nessun comune selezionato");
             }
             
-            //crea un nuovo oggetto codice fiscale con i dati dati in input dall'utente
-            codiceFiscale = new CodiceFiscale(textFieldCognome.getText(), //cognome
-                                              textFieldNome.getText(), //nome
-                                              comboBoxAnno.getSelectedIndex()+CodiceFiscale.ANNOSOGLIA, //anno di nascita
-                                              comboBoxMese.getSelectedIndex()+1, //mese di nascita
-                                              comboBoxGiorno.getSelectedIndex()+1, //giorno di nascita
-                                              sesso, //sesso
-                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(0, tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-4), //comune di appartenenza
-                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-3)); //provincia di appartenenza
-                                              //textFieldComune.getText().substring(0, textFieldComune.getText().length()-4), //comune di appartenenza 
-                                              //textFieldComune.getText().substring(textFieldComune.getText().length()-3, textFieldComune.getText().length())); //provincia di appartenenza
+            //creates a new CodiceFiscale object that contains the fiscal code data inserted in the appropriate fields in the form
+            codiceFiscale = new CodiceFiscale(textFieldCognome.getText(), //surname
+                                              textFieldNome.getText(), //name
+                                              comboBoxAnno.getSelectedIndex()+CodiceFiscale.ANNOSOGLIA, //birth year
+                                              comboBoxMese.getSelectedIndex()+1, //birth month
+                                              comboBoxGiorno.getSelectedIndex()+1, //birth day
+                                              sesso, //sex
+                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(0, tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-4), //municipality
+                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-3)); //province
+                                              //textFieldComune.getText().substring(0, textFieldComune.getText().length()-4), //alternative municipality way
+                                              //textFieldComune.getText().substring(textFieldComune.getText().length()-3, textFieldComune.getText().length())); //alternative province way
 
-            textFieldCodiceFiscale.setText(codiceFiscale.costruisciCodiceFiscale()); //costruisce il codice fiscale e lo stampa in "textFieldCodiceFiscale"
+            textFieldCodiceFiscale.setText(codiceFiscale.costruisciCodiceFiscale()); //generates the fiscal code and prints it in "textFieldCodiceFiscale"
             
         } catch(Exception ecc) {
-            textFieldErrori.setText(ecc.getMessage()); //stampa l'errore in "textFieldErrori"
+            textFieldErrori.setText(ecc.getMessage());
         }
     }//GEN-LAST:event_buttonGeneraActionPerformed
 
     /**
-     * Resetta tutti i campi dell'applicazione quando il bottone reset viene premuto
+     * Resets all of the fields in the form when the "reset" button is pressed
      * @param evt 
      */
     private void buttonResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonResetActionPerformed
         
-        //resetta tutti i campi
         textFieldCognome.setText("");
         textFieldNome.setText("");
         textFieldComune.setText("");
@@ -389,7 +399,7 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
 //        }
         //</editor-fold>
         
-        FlatLightLaf.install(); //utilizza il Look and Feel "FlatLaf Light"
+        FlatLightLaf.install(); //sets Look and Feel "FlatLaf Light"
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -400,66 +410,65 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     }
     
     /**
-     * Genera un array di String che contiene tutti gli anni dal 1848 ad oggi
-     * @return l'array di stringhe
+     * Generates a Integer[] that contains all years from 1848 to the current one
+     * @return Integer[] with all of the years in chronological order
      */
     private Integer[] initComboBoxAnno() {
         
-        int annoCorrente = Year.now().getValue(); //anno odierno
-        Integer[] items = new Integer[annoCorrente-CodiceFiscale.ANNOSOGLIA+1]; //inizializzaione array
+        int annoCorrente = Year.now().getValue(); //current year
+        Integer[] items = new Integer[annoCorrente-CodiceFiscale.ANNOSOGLIA+1]; //initialize array with correct length
         
         for (int i=0; i<items.length; i++) {
-            items[i] = CodiceFiscale.ANNOSOGLIA+i; //vengono inseriti gli anni nell'array
+            items[i] = CodiceFiscale.ANNOSOGLIA+i; //fills the array with the years
         }
         
         return items;
     }
     
     /**
-     * Genera l'elenco dei comuni in Italia e lo inserisce nella tabella di selezione, oltre ad inizializzare il sorter
-     * @throws Exception se il file da cui prendere l'elenco non viene trovato
+     * Generates a list with all of the municipalities present in Italy from a .csv file, and inserts them in "tableComune" (Municipality table)
+     * It also initializes the RowSorter and Filter for the table, so that it's possible to search for a specific municipality
+     * @throws Exception if the .csv file is not found
      */
     private void initTableComune() throws Exception {
         
-        final String DELIMITATORE = ","; //delimitatore dei valori nel file .csv
-        Scanner input = new Scanner(CodiceFiscale.ELENCOCOMUNI); //apertura di un file di testo
-        String linea; //contiene la riga del file .csv che si sta analizzando
-        DefaultTableModel modello = (DefaultTableModel)tableComune.getModel(); //si recupera il modello della tabella con l'elenco dei comuni, per poter aggiungere righe
-        String[] output = new String[1]; //contiene il testo da mettere nella riga della tabella su cui si sta operando (è un array perché il metodo addRow accetta solo array)
-        String[] lineaArray; //array utilizzato per formattare la stringa da inserire nella riga della tabella
+        final String DELIMITATORE = ","; //value delimitator in .csv files
+        Scanner input = new Scanner(CodiceFiscale.ELENCOCOMUNI);
+        DefaultTableModel modello = (DefaultTableModel)tableComune.getModel(); //gets the model of the municipality table, to add more rows
+        String[] output = new String[1]; //contains the text to inert at the appropriate row in the table (it's an array because jTable.addRow() accept only arrays even if single column)
+        String[] linea; //contains the current line of the .csv file, split in parts
 
-        while(input.hasNextLine()) { //il file viene letto fino alla fine
+        while(input.hasNextLine()) { //reads all of the lines of the file
 
-            linea = input.nextLine(); //legge una riga
+            linea = input.nextLine().split(DELIMITATORE); //splits the line in Municipality, Province and Municipality code
 
-            lineaArray = linea.split(DELIMITATORE); //spezza la riga nelle 3 parti: comune, provincia e codice catastale
+            output[0] = linea[0] + ", " + linea[1]; //formats the String to add in a table row, like this: "Municipality, Province"
 
-            linea = lineaArray[0] + ", " + lineaArray[1]; //memeorizza solo comune e provincia, formattate adeguatamente
-
-            output[0] = linea; //visto che addRow accetta solo array, si mette il testo nell'array output a indice 0
-
-            modello.addRow(output); //si aggiunge la riga alla tabella
+            modello.addRow(output); //adds a row containing Municipality and Province to the table
         }
         
-        sorter = new TableRowSorter<>(tableComune.getModel()); //creazione oggetto TableRowSorter
-        tableComune.setRowSorter(sorter); //imposta il sorter come sorter della tabella con l'elenco dei comuni
+        sorter = new TableRowSorter<>(tableComune.getModel()); //creates a TableRowSorter
+        tableComune.setRowSorter(sorter); //sets the sorter as the sorter for the Municipality table
     }
     
     /**
-     * Controlla quando il testo in textFieldComune viene cambiato. quando viene cambiato, esegue la ricerca del termine inserito nel textfield (ricercaTableComune)
+     * Whenever the text in "textFieldComune" (the search field for the Municipality table) is changed, the search fro the municipality table is updated
      */
     private void textFieldComuneUpdate() {
         
-        //aggiunge un documentListener a textFieldComune
+        //adds a DocumentListener to the search text field
         textFieldComune.getDocument().addDocumentListener(
                 new DocumentListener() {
-                    //quando il testo in textFieldComune cambia, esegue la ricerca
+                    //when the text inside it is changed, run the search method
+                    @Override
                     public void changedUpdate(DocumentEvent e) {
                         ricercaTableComune();
                     }
+                    @Override
                     public void insertUpdate(DocumentEvent e) {
                         ricercaTableComune();
                     }
+                    @Override
                     public void removeUpdate(DocumentEvent e) {
                         ricercaTableComune();
                     }
@@ -467,18 +476,17 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     }
     
     /**
-     * In base al testo scritto dall'utente in "textFieldComune", cerca in "tableComune" le row che contengono quella stringa, e nasconde tutte quelle che non la contengono
+     * Using the text input in the text search field, searches and shows only the rows that contain that text input, hiding all of the other rows
      */
     private void ricercaTableComune() {
         
-        RowFilter<TableModel, Object> filtro = null; //dichiarazione di un filtro (quello che nasconde le row che non corrispondono alla ricerca)
+        RowFilter<TableModel, Object> filtro = null; //initializes a new row filter
         
         try {
-            filtro = RowFilter.regexFilter(textFieldComune.getText().toUpperCase(), 0); //mostra solo le row che hanno una corrispondenza al testo cercato
-        } catch (java.util.regex.PatternSyntaxException e) { //If current expression doesn't parse, don't update.
-            //return;
+            filtro = RowFilter.regexFilter(textFieldComune.getText().toUpperCase(), 0); //shows only rows that have a correspondence to the regEx input in the search text field
+        } catch (java.util.regex.PatternSyntaxException e) { //if current expression doesn't parse, don't update
         }
-        sorter.setRowFilter(filtro); //viene applicato il filtro alla tabella
+        sorter.setRowFilter(filtro); //the filter gets applied do the table
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -507,5 +515,5 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     private javax.swing.JTextField textFieldErrori;
     private javax.swing.JTextField textFieldNome;
     // End of variables declaration//GEN-END:variables
-    private TableRowSorter<TableModel> sorter; //dichiarazione di un sorter (il "ricercatore")
+    private TableRowSorter<TableModel> sorter;
 }
