@@ -315,8 +315,6 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     textFieldErrori.setText("");
     textFieldCodiceFiscale.setText("");
 
-    CodiceFiscale codiceFiscale;
-
     char sesso; //char that defines the sex of the person
 
     //assigns the correct value to "sesso" (ComboBox SelectedIndex 0 --> male, SelectedIndex 1 --> female)
@@ -333,17 +331,15 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
                 throw new Exception("Nessun comune selezionato");
             }
             
-            //creates a new CodiceFiscale object that contains the fiscal code data inserted in the appropriate fields in the form
-            codiceFiscale = new CodiceFiscale(textFieldCognome.getText(), //surname
-                                              textFieldNome.getText(), //name
-                                              comboBoxAnno.getSelectedIndex()+CodiceFiscale.ANNOSOGLIA, //birth year
-                                              comboBoxMese.getSelectedIndex()+1, //birth month
-                                              comboBoxGiorno.getSelectedIndex()+1, //birth day
-                                              sesso, //sex
-                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(0, tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-4), //municipality
-                                              tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-3)); //province
-                                              //textFieldComune.getText().substring(0, textFieldComune.getText().length()-4), //alternative municipality way
-                                              //textFieldComune.getText().substring(textFieldComune.getText().length()-3, textFieldComune.getText().length())); //alternative province way
+            //retrieves all of the data from the app's fields in the UI to build the fiscal code
+            codiceFiscale.setCognome(textFieldCognome.getText());
+            codiceFiscale.setNome(textFieldNome.getText());
+            codiceFiscale.setAnno(comboBoxAnno.getSelectedIndex()+CodiceFiscale.ANNOSOGLIA);
+            codiceFiscale.setMese(comboBoxMese.getSelectedIndex()+1);
+            codiceFiscale.setGiorno(comboBoxGiorno.getSelectedIndex()+1);
+            codiceFiscale.setSesso(sesso);
+            codiceFiscale.setComune(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(0, tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-4));
+            codiceFiscale.setProvincia(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().substring(tableComune.getValueAt(tableComune.getSelectedRow(), 0).toString().length()-3));
 
             textFieldCodiceFiscale.setText(codiceFiscale.costruisciCodiceFiscale()); //generates the fiscal code and prints it in "textFieldCodiceFiscale"
             
@@ -480,7 +476,7 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
      */
     private void ricercaTableComune() {
         
-        RowFilter<TableModel, Object> filtro = null; //initializes a new row filter
+        RowFilter<TableModel, Integer> filtro = null; //initializes a new row filter
         
         try {
             filtro = RowFilter.regexFilter(textFieldComune.getText().toUpperCase(), 0); //shows only rows that have a correspondence to the regEx input in the search text field
@@ -516,4 +512,5 @@ public class CodiceFiscaleUI extends javax.swing.JFrame {
     private javax.swing.JTextField textFieldNome;
     // End of variables declaration//GEN-END:variables
     private TableRowSorter<TableModel> sorter;
+    private CodiceFiscale codiceFiscale = new CodiceFiscale();
 }

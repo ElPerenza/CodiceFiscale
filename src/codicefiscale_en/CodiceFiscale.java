@@ -29,8 +29,8 @@ import java.util.Scanner;
  */
 public class CodiceFiscale {
     
-    private final String CONSONANTI = "BCDFGHJKLMNPQRSTVWXYZ";
-    private final String VOCALI = "AEIOU";
+    private final String CONSONANTI = "BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz";
+    private final String VOCALI = "AEIOUaeiou";
     /**
      * 125 years before the introduction of the fiscal code in 1973. No one that got a fiscal code was born before this year
      */
@@ -153,9 +153,7 @@ public class CodiceFiscale {
      */
     public void setGiorno(int giorno) throws Exception {
         
-        boolean esistente = isGiornoEsistente(giorno, mese, anno); //checks if the day exists
-        
-        if(giorno < 1 || giorno > 31 || !esistente) {
+        if(giorno < 1 || giorno > 31) {
             throw new Exception("Il giorno inserito non esiste.");
         }
         this.giorno = giorno;
@@ -278,12 +276,11 @@ public class CodiceFiscale {
         
         stringa = rimouviAccentate(stringa); //removes all accents
         
-        String ridotta = "";
+        //creates a regular expression that negates a character array formed by "caratteri"
+        //that's then used to remove every character of the input string that doesn't appear in the regex
+        String regex = "[^(?!"+caratteri+")]";
+        String ridotta = stringa.replaceAll(regex, "");
         
-        for (int i = 0; i < stringa.length(); i++) {
-            if (caratteri.indexOf(stringa.charAt(i)) != -1) //all of the characters of the string present in "caratteri" are kept, the others are removed
-                ridotta = ridotta + stringa.charAt(i);
-        }
         return ridotta;
     }
     
@@ -363,7 +360,7 @@ public class CodiceFiscale {
      */
     private String stringaGiornoNascitaSesso(int giorno, char sesso) {
         
-        String output = null;
+        String output = String.valueOf(giorno);
         
         if(sesso=='f' || sesso=='F') { //if sex is female, 40 is added to the value of the day
             giorno=giorno+40;
@@ -463,6 +460,11 @@ public class CodiceFiscale {
         
         String output;
         
+        //checks if the inserted date is actually exists
+        if(!isGiornoEsistente(giorno, mese, anno)) {
+            throw new Exception("Data inserita non esistente.");
+        }
+        
         output = stringaCognome(cognome) + stringaNome(nome) + stringaAnnoNascita(anno) + charMeseNascita(mese) + stringaGiornoNascitaSesso(giorno, sesso) + codiceComune(comune, provincia, ELENCOCOMUNI);
         output = output + carattereControllo(output); //adds the control char
         
@@ -484,20 +486,8 @@ public class CodiceFiscale {
         switch(mese) {
             //checks that for 30-day months the day is smaller (or equal, of course) than 30
             case 4:
-                if(giorno > 30) {
-                    output=false;
-                }
-                break;
             case 6:
-                if(giorno > 30) {
-                    output=false;
-                }
-                break;
             case 9:
-                if(giorno > 30) {
-                    output=false;
-                }
-                break;
             case 11:
                 if(giorno > 30) {
                     output=false;
@@ -529,7 +519,7 @@ public class CodiceFiscale {
     private String rimouviAccentate(String stringa) {
         
         stringa = Normalizer.normalize(stringa, Normalizer.Form.NFD); //normalize string
-        stringa = stringa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", ""); //remove the accents
+        stringa = stringa.replaceAll("\\p{M}", ""); //remove the accents
         
         return stringa;
     }
