@@ -20,6 +20,8 @@ import java.io.File;
 import java.text.Normalizer;
 import java.time.Year; 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gestisce un'istanza di CodiceFiscale.
@@ -91,14 +93,14 @@ public class CodiceFiscale {
     /**
      * Memorizza il nome della persona dato in input
      * @param nome nome della persona
-     * @throws Exception se il nome non è stato inserito o se è composto da spazi e basta 
+     * @throws Exception se il nome è vuoto o se non ha caratteri dell'alfabeto 
      */
     public void setNome(String nome) throws Exception {
         
         nome = nome.trim();
         
-        if(nome.length() < 1 || nome.isBlank()) {
-            throw new Exception("Il nome non può essere vuoto o composto da soli spazi.");
+        if(nome.length() < 1 || nome.isBlank() || !hasCharsAlfabeto(nome)) {
+            throw new Exception("Nome non valido.");
         }
         this.nome = nome;
     }
@@ -106,14 +108,14 @@ public class CodiceFiscale {
     /**
      * Memorizza il cognome della persona dato in input
      * @param cognome cognome della persona
-     * @throws Exception se il cognome non è stato inserito o se è composto da spazi e basta
+     * @throws Exception se il cognome è vuoto o se non ha caratteri dell'alfabeto
      */
     public void setCognome(String cognome) throws Exception {
         
         cognome = cognome.trim();
         
-        if(cognome.length() < 1 || cognome.isBlank()) {
-            throw new Exception("Il cognome non può essere vuoto o composto da soli spazi.");
+        if(cognome.length() < 1 || cognome.isBlank() || !hasCharsAlfabeto(cognome)) {
+            throw new Exception("Cognome non valido.");
         }
         this.cognome = cognome;
     }
@@ -176,14 +178,14 @@ public class CodiceFiscale {
     /**
      * Memorizza il comune di appartenenza della persona dato in input
      * @param comune comune di appartenenza
-     * @throws Exception se il comune non è stato inserito o se è composto da uno spazio e basta
+     * @throws Exception se il comune è vuoto o se non ha caratteri dell'alfabeto
      */
     public void setComune(String comune) throws Exception {
         
         comune = comune.trim();
         
-        if(comune.length() < 1 || comune.isBlank()) {
-            throw new Exception("Il comune non può essere vuoto o composto da soli spazi.");
+        if(comune.length() < 1 || comune.isBlank() || !hasCharsAlfabeto(comune)) {
+            throw new Exception("Comune non valido.");
         }
         this.comune = comune;
     }
@@ -191,14 +193,14 @@ public class CodiceFiscale {
     /**
      * Memorizza la provincia di appartenenza della persona data in input
      * @param provincia provincia di appartenenza. Deve essere composta da solo 2 caratteri
-     * @throws Exception se la provincia non è stata inserita (o se è più lunga di 2 caratteri) o se è composta da uno spazio e basta
+     * @throws Exception se la provincia è vuota, se è più lunga di 2 caratteri o se non ha caratteri dell'alfabeto
      */
     public void setProvincia(String provincia) throws Exception {
         
         provincia = provincia.trim();
         
-        if(provincia.length() < 2 || provincia.length() > 2 || provincia.isBlank()) {
-            throw new Exception("La provincia non può essere vuota (o più lunga di 2 caratteri) o composta da soli spazi.");
+        if(provincia.length() < 2 || provincia.length() > 2 || provincia.isBlank() || !hasCharsAlfabeto(provincia)) {
+            throw new Exception("Provincia non valida.");
         }
         this.provincia = provincia.toUpperCase();
     }
@@ -513,7 +515,7 @@ public class CodiceFiscale {
     }
     
     /**
-     * sostituisce le lettere accentate della stringa con le loro controparti non accentate
+     * Sostituisce le lettere accentate della stringa con le loro controparti non accentate
      * @param stringa la stringa da cui rimuovere gli accenti
      * @return la stringa data in input senza lettere accentate
      */
@@ -523,5 +525,18 @@ public class CodiceFiscale {
         stringa = stringa.replaceAll("\\p{M}", ""); //rimuove gli accenti
         
         return stringa;
+    }
+    
+    /**
+     * Controlla che la stringa data in input contenga almeno un carattere dell'alfabeto
+     * @param stringa la stringa da controllare
+     * @return "true" se contiene un carattere dell'alfabeto, altrimenti "false"
+     */
+    private boolean hasCharsAlfabeto(String stringa) {
+        
+        Pattern pattern = Pattern.compile("[a-zA-Z]"); //compila la regex in un pattern
+        Matcher matcher = pattern.matcher(stringa); //matcher che controllerà la stringa basandosi sul pattern
+        
+        return matcher.find(); //cerca se il pattern appare nella stringa
     }
 }

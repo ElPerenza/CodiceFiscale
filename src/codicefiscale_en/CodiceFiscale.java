@@ -20,6 +20,8 @@ import java.io.File;
 import java.text.Normalizer;
 import java.time.Year; 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Manages a Codice Fiscale (fiscal code) instance.
@@ -91,14 +93,14 @@ public class CodiceFiscale {
     /**
      * Saves the person's name given in input
      * @param nome name
-     * @throws Exception if the name is blank
+     * @throws Exception if the name is blank or does not have alphabet characters
      */
     public void setNome(String nome) throws Exception {
         
         nome = nome.trim();
         
-        if(nome.length() < 1 || nome.isBlank()) {
-            throw new Exception("Il nome non può essere vuoto o composto da soli spazi.");
+        if(nome.length() < 1 || nome.isBlank() || !hasCharsAlfabeto(nome)) {
+            throw new Exception("Nome non valido.");
         }
         this.nome = nome;
     }
@@ -106,14 +108,14 @@ public class CodiceFiscale {
     /**
      * Saves the person's surname given in input
      * @param cognome surname
-     * @throws Exception if the surname is blank
+     * @throws Exception if the surname is blank or does not have alphabet characters
      */
     public void setCognome(String cognome) throws Exception {
         
         cognome = cognome.trim();
         
-        if(cognome.length() < 1 || cognome.isBlank()) {
-            throw new Exception("Il cognome non può essere vuoto o composto da soli spazi.");
+        if(cognome.length() < 1 || cognome.isBlank() || !hasCharsAlfabeto(cognome)) {
+            throw new Exception("Cognome non valido.");
         }
         this.cognome = cognome;
     }
@@ -175,14 +177,14 @@ public class CodiceFiscale {
     /**
      * Saves the person's municipality given in input
      * @param comune municipality
-     * @throws Exception if the municipality is blank
+     * @throws Exception if the municipality is blank or does not have alphabet characters
      */
     public void setComune(String comune) throws Exception {
         
         comune = comune.trim();
         
-        if(comune.length() < 1 || comune.isBlank()) {
-            throw new Exception("Il comune non può essere vuoto o composto da soli spazi.");
+        if(comune.length() < 1 || comune.isBlank() || !hasCharsAlfabeto(comune)) {
+            throw new Exception("Comune non valido.");
         }
         this.comune = comune;
     }
@@ -190,14 +192,14 @@ public class CodiceFiscale {
     /**
      * Saves the person's province code given in input
      * @param provincia priovince code, must be formed of only 2 characters
-     * @throws Exception if the province code is blank or is not formed by 2 characters
+     * @throws Exception if the province code is blank, is not formed by 2 characters or does not have alphabet characters
      */
     public void setProvincia(String provincia) throws Exception {
         
         provincia = provincia.trim();
         
-        if(provincia.length() < 2 || provincia.length() > 2 || provincia.isBlank()) {
-            throw new Exception("La provincia non può essere vuota (o più lunga di 2 caratteri) o composta da soli spazi.");
+        if(provincia.length() < 2 || provincia.length() > 2 || provincia.isBlank() || !hasCharsAlfabeto(provincia)) {
+            throw new Exception("Provincia non valida.");
         }
         this.provincia = provincia.toUpperCase(); //all of the province 2 character codes are written all uppercase
     }
@@ -522,5 +524,18 @@ public class CodiceFiscale {
         stringa = stringa.replaceAll("\\p{M}", ""); //remove the accents
         
         return stringa;
+    }
+    
+    /**
+     * Checks that the input string contains at least one alphabet character
+     * @param stringa the string to check
+     * @return "true" if the string contains at least one alphabet char, otherwise "false"
+     */
+    private boolean hasCharsAlfabeto(String stringa) {
+        
+        Pattern pattern = Pattern.compile("[a-zA-Z]"); //compiles the regex in a pattern
+        Matcher matcher = pattern.matcher(stringa); //matcher that will match the string against the pattern
+        
+        return matcher.find(); //searches if the pattern appears in the string
     }
 }
